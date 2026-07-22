@@ -1,0 +1,5 @@
+# Privacy policies for apps rendered inline on this hub.
+#
+# Add <slug>.md here to publish /<slug>/privacy for the app in content/apps/<slug>.md.
+# Apps with their own `website` do not belong here — their policy lives on their
+# own site (BlackFlare, for one).

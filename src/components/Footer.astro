@@ -1,0 +1,95 @@
+---
+// Shared site footer — used on every page. Static manifesto line (the old
+// 14s shimmer is gone, per the minimal redesign) + copyright. The year is
+// resolved at build time, so the footer stays zero-JS.
+const year = new Date().getFullYear();
+---
+
+<footer
+	class="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 border-t border-border px-5 py-10 text-center sm:px-8"
+>
+	<div class="manifesto-container">
+		<span class="manifesto-flag" aria-hidden="true">🏴‍☠️</span>
+		<span class="manifesto-content">
+			pursuing treasure with genuine curiosity _
+			<a
+				href="https://x.com/tin_trungnguyen"
+				target="_blank"
+				rel="noopener noreferrer">@tin_trungnguyen</a
+			>
+		</span>
+	</div>
+
+	<p class="text-[0.7rem] text-white/30">
+		&copy; {year}
+		<span class="mx-1">•</span>
+		<a
+			href="https://tintrungnguyen.com"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="transition-colors hover:text-text">tintrungnguyen.com</a
+		>
+		<span class="mx-1">•</span>
+		<a href="https://theblackflagger.com" class="transition-colors hover:text-text"
+			>theblackflagger.com</a
+		>
+	</p>
+</footer>
+
+<style>
+	/* Manifesto shimmer (ported 1:1 from v2). The flag stays fully visible; the
+	   sentence + link share one slow left-to-right light sweep via clipped
+	   gradient text. Font stays SF Pro (v2 used mono; the redesign is all SF Pro). */
+	.manifesto-container {
+		font-size: 0.8rem;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		cursor: default;
+	}
+
+	.manifesto-flag {
+		font-size: 1rem;
+		opacity: 0.9;
+		filter: grayscale(20%);
+		transition: filter 0.3s ease;
+	}
+	.manifesto-container:hover .manifesto-flag {
+		filter: grayscale(0%);
+	}
+
+	.manifesto-content {
+		background: linear-gradient(
+			120deg,
+			rgba(255, 255, 255, 0.3) 40%,
+			rgba(255, 255, 255, 0.95) 50%,
+			rgba(255, 255, 255, 0.3) 60%
+		);
+		background-size: 200% auto;
+		background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		color: transparent;
+		animation: elegant-shimmer 14s linear infinite;
+	}
+
+	.manifesto-content a {
+		text-decoration: none;
+		color: inherit;
+		cursor: pointer;
+		transition: text-shadow 0.3s ease;
+	}
+	.manifesto-content a:hover {
+		-webkit-text-fill-color: #ffffff;
+		text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+	}
+
+	@keyframes elegant-shimmer {
+		0% {
+			background-position: 200% center;
+		}
+		100% {
+			background-position: -200% center;
+		}
+	}
+</style>

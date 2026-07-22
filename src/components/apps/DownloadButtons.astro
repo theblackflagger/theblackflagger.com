@@ -1,0 +1,84 @@
+---
+// The download action row on an app detail page. Renders the right widget per
+// store type (see getDownloadOptions): official Apple / Setapp badges as images,
+// Gumroad / direct downloads as styled buttons. Multiple stores → multiple
+// widgets side by side. The first *button* is accent (primary); any further
+// buttons are outlined (secondary). Badges are always the neutral brand art.
+import { getDownloadOptions, type AppStore } from "../../lib/apps";
+
+interface Props {
+	stores: AppStore[];
+	isPaid: boolean;
+}
+
+const { stores, isPaid } = Astro.props;
+
+// Mark the first button-kind option primary so a lone badge + button pair, or
+// two buttons, reads with a clear visual hierarchy.
+let buttonSeen = 0;
+const options = getDownloadOptions(stores, isPaid).map((opt) =>
+	opt.kind === "button"
+		? { ...opt, primary: buttonSeen++ === 0 }
+		: { ...opt, primary: false },
+);
+---
+
+{
+	options.length > 0 && (
+		<nav
+			class="mt-8 flex flex-wrap items-center justify-center gap-3"
+			aria-label="Download options"
+			data-reveal
+		>
+			{options.map((opt) =>
+				opt.kind === "badge" ? (
+					<a
+						href={opt.url}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="download-badge inline-block"
+						aria-label={opt.label}
+					>
+						<img
+							src={opt.badgeSrc}
+							alt={opt.label}
+							class="block h-[52px] w-auto select-none"
+							draggable="false"
+						/>
+					</a>
+				) : (
+					<a
+						href={opt.url}
+						target="_blank"
+						rel="noopener noreferrer"
+						class:list={[
+							"inline-flex h-[52px] items-center justify-center rounded-xl px-6 text-sm font-medium transition duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]",
+							opt.primary
+								? "bg-accent text-bg hover:bg-text"
+								: "border border-border text-text btn-vibrancy",
+						]}
+					>
+						{opt.label}
+					</a>
+				),
+			)}
+		</nav>
+	)
+}
+
+<style>
+	/* Match the reference badge interaction: a subtle lift + brighten on hover. */
+	.download-badge {
+		transition:
+			transform 0.2s ease,
+			filter 0.2s ease;
+	}
+	.download-badge:hover {
+		transform: scale(1.04);
+		filter: brightness(1.08);
+	}
+	.download-badge:active {
+		transform: scale(0.97);
+		filter: brightness(0.95);
+	}
+</style>

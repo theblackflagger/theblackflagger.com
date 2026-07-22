@@ -1,0 +1,71 @@
+---
+// Per-app privacy policy — /<slug>/privacy. Every app submitted to the App Store
+// needs its own Privacy URL, and this is it.
+//
+// A route is generated only where BOTH halves exist: an app rendered inline here
+// (no `website` of its own) AND a matching src/content/privacy/<slug>.md. An app
+// on its own domain publishes its policy there instead.
+//
+// Under build.format:"file" this emits /<slug>/privacy.html while [slug].astro
+// emits /<slug>.html — sibling outputs, no collision.
+import { getCollection, render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import AppLayout from "../../layouts/AppLayout.astro";
+
+export const getStaticPaths = (async () => {
+	const [apps, policies] = await Promise.all([
+		getCollection("apps"),
+		getCollection("privacy"),
+	]);
+	const inlineApps = new Map(
+		apps
+			.filter((app) => !app.data.draft && !app.data.website)
+			.map((app) => [app.id, app]),
+	);
+	return policies
+		.filter((policy) => inlineApps.has(policy.id))
+		.map((policy) => ({
+			params: { slug: policy.id },
+			props: { policy, app: inlineApps.get(policy.id)! },
+		}));
+}) satisfies GetStaticPaths;
+
+const { policy, app } = Astro.props;
+const title = policy.data.title ?? `${app.data.title} Privacy Policy`;
+const updated = policy.data.updated.toLocaleDateString("en-US", {
+	year: "numeric",
+	month: "long",
+	day: "numeric",
+	timeZone: "UTC",
+});
+const { Content } = await render(policy);
+---
+
+<AppLayout
+	title={`${title} — The Black Flagger`}
+	description={`Privacy policy for ${app.data.title}.`}
+>
+	<article class="mx-auto max-w-2xl">
+		<a
+			href={`/${app.id}`}
+			class="text-sm text-text-secondary underline decoration-border underline-offset-4 transition-colors hover:text-text hover:decoration-text"
+		>
+			← {app.data.title}
+		</a>
+
+		<header class="mt-6" data-reveal>
+			<h1 class="text-4xl font-semibold tracking-tight text-text sm:text-5xl">
+				{title}
+			</h1>
+			<p class="mt-4 text-sm text-text-tertiary">
+				Last updated <time datetime={policy.data.updated.toISOString()}>
+					{updated}
+				</time>
+			</p>
+		</header>
+
+		<div class="prose-app mt-10" data-reveal>
+			<Content />
+		</div>
+	</article>
+</AppLayout>

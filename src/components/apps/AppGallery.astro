@@ -1,0 +1,90 @@
+---
+// Screenshot gallery for the app detail page. Two layers, both on-brand:
+//   1. On-page strip — an Embla carousel (drag + arrows + keyboard). Enhances
+//      progressively: with no JS it stays a native scroll-snap strip, and each
+//      thumbnail is a plain <a> to the full image.
+//   2. Fullscreen — PhotoSwipe, dynamically imported on first click (see
+//      scripts/gallery.ts) so the page pays ~6KB up front, not ~36KB.
+// Dimensions come from getScreenshots() so <img> reserves space (no CLS) and
+// PhotoSwipe gets its required data-pswp-width/height.
+import type { Screenshot } from "../../lib/apps";
+
+interface Props {
+	screenshots: Screenshot[];
+	title: string;
+}
+
+const { screenshots, title } = Astro.props;
+---
+
+{
+	screenshots.length > 0 && (
+		<div class="app-gallery relative mx-auto mt-16 w-full" data-gallery data-reveal>
+			{/* Viewport: scrollable by default (no-JS friendly); gallery.ts adds
+			    .is-embla on the root to flip this to overflow:hidden for Embla. */}
+			<div class="app-gallery__viewport snap-x overflow-x-auto pb-2">
+				<div class="app-gallery__container flex gap-4">
+					{screenshots.map((s, i) => (
+						<a
+							href={s.src}
+							class="app-gallery__slide block flex-shrink-0 snap-start"
+							data-pswp-width={s.width}
+							data-pswp-height={s.height}
+							target="_blank"
+							rel="noopener noreferrer"
+							aria-label={`${title} screenshot ${i + 1} — open fullscreen`}
+						>
+							<img
+								src={s.src}
+								alt={`${title} screenshot ${i + 1}`}
+								width={s.width}
+								height={s.height}
+								loading="lazy"
+								class="h-96 w-auto max-w-none rounded-2xl border border-border sm:h-120 lg:h-160"
+							/>
+						</a>
+					))}
+				</div>
+			</div>
+
+			{/* Arrows start with the [hidden] attribute; gallery.ts removes it once
+			    Embla confirms the strip overflows, and toggles it back when it
+			    doesn't. No-JS visitors never see arrows (native scroll instead). */}
+			<button
+				type="button"
+				class="app-gallery__prev absolute left-2 top-1/2 h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-border bg-surface/80 text-lg text-text backdrop-blur transition duration-200 hover:border-border-strong hover:bg-surface-hover disabled:pointer-events-none disabled:opacity-25"
+				aria-label="Previous screenshots"
+				hidden
+			>
+				<span aria-hidden="true">‹</span>
+			</button>
+			<button
+				type="button"
+				class="app-gallery__next absolute right-2 top-1/2 h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-border bg-surface/80 text-lg text-text backdrop-blur transition duration-200 hover:border-border-strong hover:bg-surface-hover disabled:pointer-events-none disabled:opacity-25"
+				aria-label="Next screenshots"
+				hidden
+			>
+				<span aria-hidden="true">›</span>
+			</button>
+		</div>
+	)
+}
+
+<script>
+	import "../../scripts/gallery.ts";
+</script>
+
+<style>
+	/* Embla needs a clipped viewport once JS takes over the strip; until then
+	   the viewport scrolls natively so no-JS / failed-JS visitors keep access. */
+	.app-gallery.is-embla .app-gallery__viewport {
+		overflow: hidden;
+	}
+	/* Arrows: grid centers the glyph when shown. Hiding is handled by the global
+	   `[hidden]{display:none!important}` rule in tailwind.css, so gallery.ts only
+	   toggles the HTML `hidden` attribute to reveal/hide them. */
+	.app-gallery__prev,
+	.app-gallery__next {
+		display: grid;
+	}
+</style>

@@ -1,0 +1,21 @@
+---
+// Tag chip row, shared by the post card and the post header (DRY). Renders nothing
+// when there are no tags. Same chip look as the app platform/store tags.
+interface Props {
+	tags: string[];
+}
+
+const { tags } = Astro.props;
+---
+
+{
+	tags.length > 0 && (
+		<ul class="flex flex-wrap gap-1.5" aria-label="Tags">
+			{tags.map((tag) => (
+				<li class="rounded-md border border-border px-2 py-0.5 text-xs text-text-tertiary">
+					{tag}
+				</li>
+			))}
+		</ul>
+	)
+}

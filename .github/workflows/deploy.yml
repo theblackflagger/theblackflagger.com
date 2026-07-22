@@ -1,0 +1,43 @@
+name: Deploy to GitHub Pages
+
+# Mirror deploy. Cloudflare Pages is the primary host (connected to the repo);
+# this workflow keeps GitHub Pages build-ready so the domain can be switched
+# without extra setup. Only one host serves the domain at a time — see README.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least-privilege permissions required to deploy to GitHub Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; don't cancel an in-progress run.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Astro site
+        # Installs deps, runs `astro build`, and uploads dist/ as a Pages artifact.
+        uses: withastro/action@v3
+        with:
+          node-version: 22
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
