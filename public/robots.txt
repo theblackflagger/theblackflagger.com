@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://theblackflagger.com/sitemap-index.xml

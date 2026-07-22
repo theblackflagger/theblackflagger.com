@@ -1,0 +1,230 @@
+---
+// Root-level app detail page — /<slug> (e.g. /blackbar). Statically generated
+// per app from the collection, so it only ever claims real app slugs (never
+// /apps, which stays the gallery). Zero-JS: the FAQ uses native <details>
+// (smooth height animation via .faq in tailwind.css where supported).
+// Layout: a centered hero — the app icon sits dead-center under a soft bloom
+// (adapted, monochrome, from sindresorhus.com's centered profile hero).
+// Note: page URL is root-level, but assets stay under public/apps/<slug>/.
+//
+// This is the page an app gets when it does NOT have its own domain. An app with
+// `website` in its front matter is hosted elsewhere and is skipped here — see
+// getStaticPaths.
+import { getCollection, getEntry, render } from "astro:content";
+import type { GetStaticPaths } from "astro";
+import AppLayout from "../layouts/AppLayout.astro";
+import AppGallery from "../components/apps/AppGallery.astro";
+import DownloadButtons from "../components/apps/DownloadButtons.astro";
+import RelatedApps from "../components/apps/RelatedApps.astro";
+import { STORE_LABELS, getScreenshots } from "../lib/apps";
+
+export const getStaticPaths = (async () => {
+	const apps = await getCollection("apps");
+	return apps
+		.filter(
+			(app) =>
+				!app.data.draft &&
+				!app.data.comingSoon &&
+				// An app with its own site is linked to, never duplicated here.
+				!app.data.website,
+		)
+		.map((app) => ({ params: { slug: app.id }, props: { app } }));
+}) satisfies GetStaticPaths;
+
+const { app } = Astro.props;
+// All apps, for the "You Might Also Like" block (component handles scoring +
+// visibility filtering). getCollection is already imported for getStaticPaths.
+const allApps = await getCollection("apps");
+const { Content } = await render(app);
+const { title, subtitle, platforms, stores, isPaid, links, faq, support } =
+	app.data;
+const screenshots = getScreenshots(app.id);
+// Link the policy only when one exists — App Store submissions need the URL, but
+// a link to a page that was never written is worse than no link.
+const privacyEntry = await getEntry("privacy", app.id);
+const linkEntries = Object.entries(links ?? {});
+// Branded store tags only (App Store / Setapp / Gumroad); `direct` has no chip.
+const storeTags = stores
+	.map((s) => s.type)
+	.filter((type) => type in STORE_LABELS);
+---
+
+<AppLayout title={`${title} — The Black Flagger`} description={subtitle}>
+	<header class="mt-6 flex flex-col items-center text-center sm:mt-10">
+		<div class="icon-hero relative" data-reveal>
+			<img
+				src={`/apps/${app.id}/icon.png`}
+				alt={`${title} icon`}
+				width="256"
+				height="256"
+				class="icon-img relative z-[1] h-48 w-48 rounded-[22%] border border-border sm:h-56 sm:w-56 md:h-64 md:w-64"
+			/>
+		</div>
+
+		<h1
+			class="mt-8 text-5xl font-bold tracking-tight text-text sm:text-6xl md:text-7xl"
+			data-reveal
+		>
+			{title}
+		</h1>
+		<p
+			class="mt-4 max-w-2xl text-2xl leading-tight text-text-secondary md:text-4xl"
+			style="text-wrap: pretty"
+			data-reveal
+		>
+			{subtitle}
+		</p>
+
+		<div class="mt-5 flex flex-wrap justify-center gap-1.5" data-reveal>
+			{
+				platforms.map((p) => (
+					<span class="rounded-md border border-border px-2 py-0.5 text-xs text-text-tertiary">
+						{p}
+					</span>
+				))
+			}
+			{
+				storeTags.map((type) => (
+					<span class="rounded-md border border-border px-2 py-0.5 text-xs text-text-tertiary">
+						{STORE_LABELS[type]}
+					</span>
+				))
+			}
+			<span
+				class="rounded-md px-2 py-0.5 text-xs"
+				class:list={[
+					isPaid
+						? "bg-accent text-bg"
+						: "border border-border text-text-tertiary",
+				]}
+			>
+				{isPaid ? "Paid" : "Free"}
+			</span>
+		</div>
+
+		<DownloadButtons stores={stores} isPaid={isPaid} />
+
+		{
+			linkEntries.length > 0 && (
+				<nav
+					class="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm"
+					aria-label="More links"
+					data-reveal
+				>
+					{linkEntries.map(([label, url]) => (
+						<a
+							href={url}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="text-text-secondary underline decoration-border underline-offset-4 transition-colors hover:text-text hover:decoration-text"
+						>
+							{label}
+						</a>
+					))}
+				</nav>
+			)
+		}
+	</header>
+
+	<AppGallery screenshots={screenshots} title={title} />
+
+	<div
+		class="prose-app mx-auto mt-16 max-w-2xl text-lg text-text/90 [&_a]:text-accent [&_a]:underline [&_h2]:mt-10 [&_h2]:font-sans [&_h2]:text-2xl [&_h2]:font-semibold [&_p]:mt-5 [&_p]:leading-relaxed [&_p]:text-text-secondary"
+		data-reveal
+	>
+		<Content />
+	</div>
+
+	{
+		faq && faq.length > 0 && (
+			<section class="faq mx-auto mt-16 max-w-2xl" data-reveal>
+				<h2 class="font-sans text-2xl font-semibold text-text">FAQ</h2>
+				<div class="mt-4 divide-y divide-border border-y border-border">
+					{faq.map((item) => (
+						<details class="group py-4">
+							<summary class="cursor-pointer list-none text-base text-text marker:content-none">
+								<span class="mr-2 inline-block text-text-tertiary transition-transform group-open:rotate-90">
+									›
+								</span>
+								{item.q}
+							</summary>
+							<p class="mt-2 pl-5 text-base leading-relaxed text-text-secondary">
+								{item.a}
+							</p>
+						</details>
+					))}
+				</div>
+			</section>
+		)
+	}
+
+	{/* Support block — the App Store requires a reachable Support URL for every
+	    submitted app, and this page is that URL. The address is assembled in the
+	    browser (see email-obfuscation.js) so it never ships as plaintext. */}
+	{
+		support && (
+			<section class="mx-auto mt-16 max-w-2xl" data-reveal>
+				<h2 class="font-sans text-2xl font-semibold text-text">Support</h2>
+				<p class="mt-3 text-base leading-relaxed text-text-secondary">
+					Questions or trouble with {title}? Mail gets read.
+				</p>
+				<div class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+					<a
+						id="secure-contact"
+						href="#"
+						class="font-mono text-flare underline decoration-flare/30 underline-offset-4 transition-colors hover:decoration-flare"
+					>
+						<span id="secure-text">loading…</span>
+					</a>
+					{support.issues && (
+						<a
+							href={support.issues}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="text-text-secondary underline decoration-border underline-offset-4 transition-colors hover:text-text hover:decoration-text"
+						>
+							Report an issue
+						</a>
+					)}
+					{privacyEntry && (
+						<a
+							href={`/${app.id}/privacy`}
+							class="text-text-secondary underline decoration-border underline-offset-4 transition-colors hover:text-text hover:decoration-text"
+						>
+							Privacy policy
+						</a>
+					)}
+				</div>
+			</section>
+		)
+	}
+
+	<RelatedApps currentApp={app} allApps={allApps} />
+
+	<script>
+		import "../scripts/email-obfuscation.js";
+	</script>
+</AppLayout>
+
+<style>
+	/* Soft neutral bloom behind the centered icon — gives it presence on the dark
+	   canvas without the neon look. Monochrome adaptation of sindresorhus.com's
+	   centered profile hero (which uses a colored galaxy ring/glow). */
+	.icon-hero::before {
+		content: "";
+		position: absolute;
+		inset: -50%;
+		background: radial-gradient(
+			circle,
+			rgba(255, 255, 255, 0.12) 0%,
+			transparent 66%
+		);
+		filter: blur(26px);
+		z-index: 0;
+		pointer-events: none;
+	}
+
+	.icon-img {
+		box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.75);
+	}
+</style>

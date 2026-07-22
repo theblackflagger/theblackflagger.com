@@ -1,0 +1,57 @@
+/* Shared design tokens — the single source of truth for palette + fonts + motion.
+   Consumed two ways:
+   1. As plain CSS custom properties (imported globally in BaseLayout).
+   2. Mirrored into Tailwind's theme in tailwind.css so utilities (bg-surface,
+      text-secondary, font-sans/font-mono) resolve from the same palette.
+      Keep the two in sync.
+
+   Design language: macOS Minimal Dark — monochrome (black/white/gray) on a dark
+   canvas, flat surfaces, hairline borders. Fonts are the OS system stack
+   (SF Pro / SF Mono on Apple), so no font files ship. */
+:root {
+	/* Surfaces (dark, monochrome) */
+	--bg: #0a0a0a;
+	--surface: #151515;
+	--surface-hover: #1d1d1d;
+
+	/* Hairline borders */
+	--border: rgba(255, 255, 255, 0.08);
+	--border-strong: rgba(255, 255, 255, 0.16);
+
+	/* Text ramp */
+	--text: #f5f5f5;
+	--text-secondary: #a3a3a3;
+	/* Tertiary is used on small (10–12px) mono labels — kept at ~4.5:1 against
+	   both --bg and --surface so those labels stay WCAG AA legible. */
+	--text-tertiary: #7d7d7d;
+
+	/* Emphasis (pure white — buttons, active pills) */
+	--accent: #ffffff;
+
+	/* Flare — the shared app accent. A warm amber, originally lifted from the
+	   BlackFlare app icon and now used across every app page (the home page stays
+	   monochrome). Marks emphasis, never structure: highlighted words, active
+	   states, icon fills, prose links. All three solid tones clear WCAG AA on
+	   every surface (worst case --flare-deep on --surface-hover, 6.14:1). */
+	--flare: #ff9d2e;
+	--flare-bright: #ffcf8a;
+	--flare-deep: #f47a1a;
+	/* Ambient bloom behind an element — never used for text. */
+	--flare-glow: rgba(255, 157, 46, 0.22);
+
+	/* System font stack — SF Pro on Apple via ui-sans-serif; SF Mono via
+	   ui-monospace. Graceful fallback on non-Apple platforms. */
+	--font-sans: ui-sans-serif, -apple-system, system-ui, "Segoe UI", sans-serif;
+	--font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+
+	/* macOS-flavored easing for micro-interactions */
+	--ease: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Reveal targets start hidden ONLY when JS + motion are active (the <head>
+   guard adds .reveal-js). GSAP (reveal.ts) then fades/rises them in. Without
+   the class — reduced-motion or no-JS — they stay visible, so there is no
+   flash and nothing can get stuck hidden. */
+html.reveal-js [data-reveal] {
+	opacity: 0;
+}

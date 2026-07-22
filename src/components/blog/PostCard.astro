@@ -1,0 +1,51 @@
+---
+// Blog listing card — title, date, description, tags, and optional hero image,
+// linking to the post. Frosted `.card-vibrancy` pane, same material as every
+// other box on a templated page. Date is formatted at build time (UTC) so the
+// card stays zero-JS.
+import type { CollectionEntry } from "astro:content";
+import TagList from "./TagList.astro";
+
+interface Props {
+	post: CollectionEntry<"blog">;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, tags, heroImage } = post.data;
+const dateLabel = pubDate.toLocaleDateString("en-US", {
+	year: "numeric",
+	month: "short",
+	day: "numeric",
+	timeZone: "UTC",
+});
+---
+
+{/* No `transition-colors` and no `hover:border-border-strong` here: the utility
+    would replace the class's own `transition` (dropping the shadow animation),
+    and the border already brightens on `.card-vibrancy:hover`. */}
+<article class="card-vibrancy group rounded-2xl border border-border">
+	<a href={`/blog/${post.id}`} class="block p-6 sm:p-8">
+		{
+			heroImage && (
+				<img
+					src={heroImage}
+					alt=""
+					class="mb-5 w-full rounded-xl border border-border"
+					loading="lazy"
+				/>
+			)
+		}
+		<time datetime={pubDate.toISOString()} class="text-xs text-text-tertiary">
+			{dateLabel}
+		</time>
+		<h2
+			class="mt-2 text-xl font-semibold tracking-tight text-text transition-colors group-hover:text-flare"
+		>
+			{title}
+		</h2>
+		<p class="mt-2 text-base leading-relaxed text-text-secondary">
+			{description}
+		</p>
+		{tags.length > 0 && <div class="mt-4"><TagList tags={tags} /></div>}
+	</a>
+</article>

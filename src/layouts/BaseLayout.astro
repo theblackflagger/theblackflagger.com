@@ -1,0 +1,80 @@
+---
+// Typography is the OS system stack (SF Pro / SF Mono on Apple, graceful
+// fallback elsewhere) declared in tokens.css — no font files ship.
+import "../styles/tokens.css";
+import Sunrise from "../components/Sunrise.astro";
+
+interface Props {
+	title?: string;
+	description?: string;
+	/** OG/Twitter image, resolved against the site origin. */
+	image?: string;
+}
+
+const {
+	title = "The Black Flagger",
+	description = "The Black Flagger — once a pirate, forever a pirate.",
+	image = "/og-default.png",
+} = Astro.props;
+
+// Absolute URLs for canonical + social cards. Astro.site is set in astro.config.
+// build.format:'file' makes pathname "/foo.html" (and "/index.html" for home);
+// strip the extension so canonical + social URLs are the clean served URL —
+// "/foo", and "/" for the home page.
+const rawPath = Astro.url.pathname;
+const cleanPath =
+	rawPath === "/" || rawPath === "/index.html"
+		? "/"
+		: rawPath.replace(/\.html$/, "");
+const canonical = new URL(cleanPath, Astro.site);
+const ogImage = new URL(image, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+		<link
+			rel="icon"
+			href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='5' fill='%230a0a0a'/><path d='M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3' fill='none' stroke='%23f5f5f5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>"
+		/>
+
+		<!-- Open Graph -->
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="The Black Flagger" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:image" content={ogImage} />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImage} />
+
+		<meta name="generator" content={Astro.generator} />
+
+		<!-- Reveal guard: hide [data-reveal] pre-paint ONLY when motion is allowed,
+		     so GSAP can animate text in. Runs synchronously before body paints;
+		     reduced-motion / no-JS visitors keep content visible (see reveal.ts). -->
+		<script is:inline>
+			if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+				document.documentElement.classList.add("reveal-js");
+			}
+		</script>
+
+		<slot name="head" />
+	</head>
+	<body>
+		<Sunrise />
+		<slot />
+		<script>
+			import "../scripts/reveal.ts";
+		</script>
+	</body>
+</html>

@@ -1,0 +1,120 @@
+---
+// "You Might Also Like" — auto-scored related apps for an app detail page.
+// Score: shared platform ×3 + shared store-type ×1 + same isPaid ×1; sort by
+// score then newest; take top 8, shuffle, show 3. Excludes the current app and
+// hidden apps (draft/archived/unlisted). Coming-soon apps ARE included but
+// render as a non-clickable monogram teaser — they have no detail page or icon,
+// so linking to them would 404 (mirrors the gallery's coming-soon card). The
+// block self-hides when there are no candidates. Zero-JS: everything runs at
+// build and is baked into the static HTML (the shuffle is computed once per
+// build; the picked order may differ between builds).
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+	currentApp: CollectionEntry<"apps">;
+	allApps: CollectionEntry<"apps">[];
+}
+
+const { currentApp, allApps } = Astro.props;
+const cur = currentApp.data;
+
+const candidates = allApps.filter((app) => {
+	if (app.id === currentApp.id) return false;
+	const d = app.data;
+	// Coming-soon apps stay eligible (rendered as a non-clickable teaser below);
+	// only truly hidden apps are excluded.
+	return !d.draft && !d.isArchived && !d.isUnlisted;
+});
+
+const curStoreTypes = new Set(cur.stores.map((s) => s.type));
+
+const scored = candidates.map((app) => {
+	const d = app.data;
+	let score = 0;
+	for (const p of d.platforms) {
+		if (cur.platforms.includes(p)) score += 3;
+	}
+	for (const s of d.stores) {
+		if (curStoreTypes.has(s.type)) score += 1;
+	}
+	if (d.isPaid === cur.isPaid) score += 1;
+	return { app, score };
+});
+
+// Higher score first; tie-break newest first.
+scored.sort(
+	(a, b) => b.score - a.score || +b.app.data.pubDate - +a.app.data.pubDate,
+);
+
+// Build-time Fisher-Yates. Runs once per build; result is baked into the
+// static HTML (order can vary between builds — fine for a "you might like" pick).
+function shuffle<T>(items: T[]): T[] {
+	const out = [...items];
+	for (let i = out.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[out[i], out[j]] = [out[j], out[i]];
+	}
+	return out;
+}
+
+const pool = scored.slice(0, 8);
+const related = shuffle(pool)
+	.slice(0, 3)
+	.map((entry) => entry.app);
+---
+
+{
+	related.length > 0 && (
+		<aside
+			class="mx-auto mt-24 max-w-2xl border-t border-border pt-12"
+			data-reveal
+		>
+			<h2 class="text-center text-sm font-medium uppercase tracking-wider text-text-tertiary">
+				You Might Also Like
+			</h2>
+			<div class="mt-8 flex justify-center gap-6 sm:gap-10">
+				{related.map((app) => {
+					// Coming-soon apps have no detail page/icon → non-clickable
+					// monogram teaser (mirrors the gallery's coming-soon card).
+					const isComingSoon = app.data.comingSoon;
+					const Tag = isComingSoon ? "div" : "a";
+					const linkAttrs = isComingSoon ? {} : { href: `/${app.id}` };
+					return (
+						<Tag
+							{...linkAttrs}
+							class:list={[
+								"group flex w-20 flex-col items-center gap-2 sm:w-28 sm:gap-3",
+								isComingSoon && "cursor-default",
+							]}
+						>
+							{isComingSoon ? (
+								<div class="flex h-16 w-16 items-center justify-center rounded-[22%] border border-border bg-white/[0.03]">
+									<span class="text-2xl font-semibold text-text-tertiary">
+										{app.data.title.charAt(0)}
+									</span>
+								</div>
+							) : (
+								<img
+									src={`/apps/${app.id}/icon.png`}
+									width="64"
+									height="64"
+									alt={`${app.data.title} icon`}
+									class="h-16 w-16 rounded-[22%] border border-border transition-transform group-hover:scale-110"
+									loading="lazy"
+								/>
+							)}
+							<span class="text-center text-xs font-medium leading-tight text-text-secondary sm:text-sm">
+								{app.data.title}
+								{isComingSoon && (
+									<span class="mt-0.5 block text-[10px] font-medium uppercase tracking-wide text-text-tertiary">
+										Coming soon
+									</span>
+								)}
+							</span>
+						</Tag>
+					);
+				})}
+			</div>
+		</aside>
+	)
+}

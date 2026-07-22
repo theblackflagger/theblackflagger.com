@@ -1,0 +1,33 @@
+---
+// Responsive grid of AppCards. Also renders the "no matches" note that the
+// filter script toggles when a chip hides every card.
+import type { CollectionEntry } from "astro:content";
+import AppCard from "./AppCard.astro";
+
+interface Props {
+	apps: CollectionEntry<"apps">[];
+}
+
+const { apps } = Astro.props;
+---
+
+<div data-apps-grid class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+	{
+		apps.map((app) => (
+			<AppCard
+				slug={app.id}
+				title={app.data.title}
+				subtitle={app.data.subtitle}
+				platforms={app.data.platforms}
+				stores={app.data.stores.map((s) => s.type)}
+				isPaid={app.data.isPaid}
+				comingSoon={app.data.comingSoon}
+				website={app.data.website}
+			/>
+		))
+	}
+</div>
+
+<p data-apps-empty hidden class="mt-8 text-center text-sm text-text-tertiary">
+	No apps match this filter.
+</p>

@@ -1,0 +1,56 @@
+---
+// /about — studio intro. Placeholder copy (edit freely). Centered statement
+// layout matching the content-page style (SF Pro, monochrome, AppLayout chrome).
+import AppLayout from "../layouts/AppLayout.astro";
+---
+
+<AppLayout
+	title="About — The Black Flagger"
+	description="The Black Flagger — an independent studio building small, well-crafted apps. Once a pirate, forever a pirate."
+>
+	<section class="mx-auto max-w-2xl text-center">
+		<h1
+			class="text-4xl font-semibold tracking-tight text-text sm:text-5xl"
+			data-reveal
+		>
+			About
+		</h1>
+
+		<div
+			class="mt-8 space-y-5 text-lg leading-relaxed text-text-secondary"
+			data-reveal
+		>
+			<p>
+				The Black Flagger is an independent studio sailing under a black
+				flag — building small, genuinely useful apps for the people who
+				use them, not for medals.
+			</p>
+			<p>
+				We chase every app like buried treasure — pursuing it with genuine
+				curiosity, until the thing in our hands is truly well-crafted.
+			</p>
+			{/* The manifesto line carries the shared amber accent — a single
+			    highlighted phrase, not body copy. */}
+			<p class="text-flare">
+				Pirates don't fight for medals, they fight for freedom. 🏴‍☠️
+			</p>
+		</div>
+
+		<div class="mt-10 flex flex-wrap justify-center gap-3" data-reveal>
+			<a
+				href="/apps"
+				class="btn-vibrancy rounded-lg border border-border px-5 py-2.5 text-sm text-text transition duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]"
+			>
+				See the apps
+			</a>
+			<a
+				href="https://github.com/theblackflagger"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="btn-vibrancy rounded-lg border border-border px-5 py-2.5 text-sm text-text transition duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]"
+			>
+				GitHub
+			</a>
+		</div>
+	</section>
+</AppLayout>

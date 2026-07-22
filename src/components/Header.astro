@@ -1,0 +1,62 @@
+---
+// Shared site header — ⌘ logo + primary nav (Apps · About · Blog).
+// Used on every page (home directly, content pages via AppLayout).
+// Active link derives from the current path. build.format:'file' makes
+// Astro.url.pathname end in ".html" at build time, so normalize it first.
+const raw = Astro.url.pathname;
+const path = raw === "/index.html" ? "/" : raw.replace(/\.html$/, "");
+
+const navItems = [
+	{ label: "Apps", href: "/apps" },
+	{ label: "About", href: "/about" },
+	{ label: "Blog", href: "/blog" },
+];
+
+// A nav item is active on its own section (e.g. /blog and /blog/post).
+const isActive = (href: string) => path === href || path.startsWith(href + "/");
+---
+
+<header
+	class="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-6 sm:px-8"
+>
+	<a
+		href="/"
+		class="inline-flex items-center text-text-secondary transition-colors hover:text-text"
+		aria-label="The Black Flagger — home"
+	>
+		<svg
+			class="h-6 w-6"
+			viewBox="2 2 20 20"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			aria-hidden="true"
+		>
+			<path
+				d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"
+			></path>
+		</svg>
+	</a>
+
+	<nav aria-label="Primary" class="flex items-center gap-0.5 sm:gap-1">
+		{
+			navItems.map((item) => (
+				<a
+					href={item.href}
+					aria-current={isActive(item.href) ? "page" : undefined}
+					class:list={[
+						// Nav hover matches the /blackflare demo header: a subtle 5%
+						// white fill + text brighten (not the frosted `.btn-vibrancy`
+						// used by other pills/buttons site-wide).
+						"rounded-lg px-3 py-2 text-sm transition-colors duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-white/5 hover:text-text",
+						isActive(item.href) ? "text-text" : "text-text-secondary",
+					]}
+				>
+					{item.label}
+				</a>
+			))
+		}
+	</nav>
+</header>

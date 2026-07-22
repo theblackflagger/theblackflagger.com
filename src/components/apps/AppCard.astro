@@ -1,0 +1,122 @@
+---
+// A single app tile in the /apps gallery. Carries data-stores + data-paid so
+// the client-side filter can show/hide it. Translucent frosted background
+// (macOS vibrancy) lets the ambient sunrise show through behind each card.
+// A `comingSoon` app renders as a non-clickable teaser with a monogram
+// placeholder instead of an icon + link.
+import { STORE_LABELS } from "../../lib/apps";
+
+interface Props {
+	slug: string;
+	title: string;
+	subtitle: string;
+	platforms: string[];
+	stores: string[];
+	isPaid: boolean;
+	comingSoon?: boolean;
+	/** The app's own domain, when it has one. */
+	website?: string;
+}
+
+const {
+	slug,
+	title,
+	subtitle,
+	platforms,
+	stores,
+	isPaid,
+	comingSoon = false,
+	website,
+} = Astro.props;
+
+// Coming-soon teasers have no detail page, so they render as a <div>, not a link.
+// An app with its own domain links straight out — the hub generates no inline
+// page for it. Same tab: both are ours, and a new window for a sibling site reads
+// as an interruption rather than a courtesy.
+const Tag = comingSoon ? "div" : "a";
+const linkAttrs = comingSoon ? {} : { href: website ?? `/${slug}` };
+---
+
+<Tag
+	{...linkAttrs}
+	data-app-card
+	data-reveal
+	data-stores={stores.join(" ")}
+	data-paid={String(isPaid)}
+	class:list={[
+		"group flex gap-4 rounded-2xl border border-white/[0.08] p-5 backdrop-blur-xl transition duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] sm:gap-5 sm:p-6",
+		comingSoon
+			? "cursor-default bg-white/[0.02] opacity-70"
+			: "bg-white/[0.04] hover:-translate-y-0.5 hover:border-white/[0.16] hover:bg-white/[0.07]",
+	]}
+>
+	{
+		comingSoon ? (
+			<div class="flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-[22%] border border-border bg-white/[0.03] sm:h-28 sm:w-28">
+				<span class="text-4xl font-semibold text-text-tertiary">
+					{title.charAt(0)}
+				</span>
+			</div>
+		) : (
+			<img
+				src={`/apps/${slug}/icon.png`}
+				alt={`${title} icon`}
+				width="128"
+				height="128"
+				loading="lazy"
+				class="h-24 w-24 flex-shrink-0 rounded-[22%] drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)] sm:h-28 sm:w-28"
+			/>
+		)
+	}
+
+	<div class="flex min-w-0 flex-col justify-center">
+		<h3 class="text-2xl font-bold text-text sm:text-3xl">{title}</h3>
+		<p
+			class="mt-1 text-lg leading-tight text-text-secondary sm:text-xl"
+			style="text-wrap: pretty"
+		>
+			{subtitle}
+		</p>
+
+		<div class="mt-3 flex flex-wrap gap-1.5">
+			{
+				comingSoon && (
+					<span class="rounded-md border border-border px-2 py-0.5 text-xs text-text-tertiary">
+						Coming soon
+					</span>
+				)
+			}
+			{
+				platforms.map((p) => (
+					<span class="rounded-md border border-border px-2 py-0.5 text-xs text-text-tertiary">
+						{p}
+					</span>
+				))
+			}
+			{
+				!comingSoon &&
+					stores
+						.filter((s) => s in STORE_LABELS)
+						.map((s) => (
+							<span class="rounded-md border border-border px-2 py-0.5 text-xs text-text-tertiary">
+								{STORE_LABELS[s]}
+							</span>
+						))
+			}
+			{
+				!comingSoon && (
+					<span
+						class="rounded-md px-2 py-0.5 text-xs"
+						class:list={[
+							isPaid
+								? "bg-flare text-bg"
+								: "border border-border text-text-tertiary",
+						]}
+					>
+						{isPaid ? "Paid" : "Free"}
+					</span>
+				)
+			}
+		</div>
+	</div>
+</Tag>

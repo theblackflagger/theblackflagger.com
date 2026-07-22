@@ -1,0 +1,48 @@
+---
+// /blog — collection listing. Lists non-draft posts newest first (mirrors the apps
+// gallery pattern). Falls back to the empty state when there are no posts, so an
+// empty collection is graceful rather than a crash.
+import AppLayout from "../layouts/AppLayout.astro";
+import { getCollection } from "astro:content";
+import PostCard from "../components/blog/PostCard.astro";
+
+const posts = (await getCollection("blog"))
+	.filter((post) => !post.data.draft)
+	.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+---
+
+<AppLayout
+	title="Blog — The Black Flagger"
+	description="Notes from the voyage — writing from The Black Flagger."
+>
+	<section class="mx-auto max-w-2xl text-center">
+		<h1
+			class="text-4xl font-semibold tracking-tight text-text sm:text-5xl"
+			data-reveal
+		>
+			Blog
+		</h1>
+		<p class="mt-4 text-base text-text-secondary" data-reveal>
+			Notes from the voyage.
+		</p>
+	</section>
+
+	{
+		posts.length > 0 ? (
+			<div class="mx-auto mt-12 flex max-w-2xl flex-col gap-4">
+				{posts.map((post) => (
+					<div data-reveal>
+						<PostCard post={post} />
+					</div>
+				))}
+			</div>
+		) : (
+			<div
+				class="mx-auto mt-12 max-w-2xl rounded-3xl border border-border bg-surface p-12 text-center"
+				data-reveal
+			>
+				<p class="text-text-tertiary">No posts yet — check back soon. 🏴‍☠️</p>
+			</div>
+		)
+	}
+</AppLayout>

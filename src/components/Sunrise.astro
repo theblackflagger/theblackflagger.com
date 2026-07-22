@@ -1,0 +1,169 @@
+---
+// Ambient sunrise — anchored to the bottom of the page (the footer horizon),
+// behind all content (z-index:-1). Rendered once in BaseLayout so it appears on
+// every page. Absolutely positioned against the body (see `body { position:
+// relative }` in tailwind.css), so the sun rises at the footer of each page.
+//
+// Exact copy of what BlackFlare v4 composites at its footer — two layer sets:
+// the broad "global" sunrise wash and the tighter "finale" zone sunrise, each
+// glow + bloom + horizon with v4's verbatim values. Crucially, the finale set
+// is wrapped in `isolation: isolate` (like v4's .finale) so its screen-blend
+// glow does NOT screen against the base set — they alpha-composite instead.
+// Without that isolation the two glows multiply into a bright center hotspot.
+// Scoped styles travel with the markup, so this component is self-contained.
+---
+
+<div class="sunrise-container" aria-hidden="true">
+	<!-- Base set — v4's global sunrise as it lands at the page bottom -->
+	<div class="set-base">
+		<div class="glow-base"></div>
+		<div class="bloom-base"></div>
+		<div class="horizon-base"></div>
+	</div>
+	<!-- Finale set — v4's footer-zone sunrise (isolated, as in v4's .finale) -->
+	<div class="set-finale">
+		<div class="glow-finale"></div>
+		<div class="bloom-finale"></div>
+		<div class="horizon-finale"></div>
+	</div>
+</div>
+
+<style>
+	.sunrise-container {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		height: 100vh;
+		pointer-events: none;
+		z-index: -1;
+		overflow: hidden;
+		opacity: 0;
+		transform: translateY(20px);
+		/* Starts immediately on load (no delay) and blooms in over 5s. */
+		animation: sunrise-entry 5s ease-out forwards;
+	}
+
+	@keyframes sunrise-entry {
+		0% {
+			opacity: 0;
+			transform: translateY(30px);
+		}
+		100% {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.set-base,
+	.set-finale {
+		position: absolute;
+		inset: 0;
+	}
+	/* v4's .finale isolates its sunrise: the finale glow's screen blend stays
+	   inside this group, then the group alpha-composites over the base set.
+	   This is what keeps the footer center subdued instead of doubled-bright. */
+	.set-finale {
+		isolation: isolate;
+	}
+
+	/* ---------------- base set (v4 global sunrise, verbatim) ---------------- */
+	.glow-base {
+		position: absolute;
+		bottom: -20vh;
+		left: 50%;
+		width: 150vw;
+		height: 80vh;
+		transform: translateX(-50%);
+		background: radial-gradient(
+			circle at 50% 100%,
+			rgba(255, 140, 60, 0.15) 0%,
+			rgba(150, 80, 200, 0.08) 40%,
+			rgba(0, 0, 0, 0) 70%
+		);
+		filter: blur(80px);
+		mix-blend-mode: screen;
+		animation: breathe-light 10s ease-in-out infinite alternate;
+	}
+	.bloom-base {
+		position: absolute;
+		bottom: -100px;
+		left: 50%;
+		width: 500px;
+		height: 500px;
+		transform: translateX(-50%);
+		background: radial-gradient(circle, rgba(255, 200, 150, 0.1) 0%, transparent 70%);
+		filter: blur(60px);
+		animation: slow-rise 20s ease-in-out infinite alternate;
+	}
+	.horizon-base {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		height: 300px;
+		background: linear-gradient(to top, rgba(255, 100, 50, 0.1) 0%, transparent 100%);
+		filter: blur(40px);
+	}
+
+	/* ---------------- finale set (v4 footer zone, verbatim) ---------------- */
+	.glow-finale {
+		position: absolute;
+		/* -22% / 90% of v4's ~720px finale zone, resolved to px. */
+		bottom: -160px;
+		left: 50%;
+		width: 150%;
+		height: 650px;
+		transform: translateX(-50%);
+		background: radial-gradient(
+			circle at 50% 100%,
+			rgba(255, 140, 60, 0.18) 0%,
+			rgba(150, 80, 200, 0.09) 42%,
+			rgba(0, 0, 0, 0) 72%
+		);
+		filter: blur(80px);
+		mix-blend-mode: screen;
+		animation: breathe-light 10s ease-in-out infinite alternate;
+	}
+	.bloom-finale {
+		position: absolute;
+		bottom: -140px;
+		left: 50%;
+		width: 620px;
+		max-width: 92vw;
+		height: 620px;
+		transform: translateX(-50%);
+		background: radial-gradient(circle, rgba(255, 205, 155, 0.14) 0%, transparent 70%);
+		filter: blur(60px);
+		animation: slow-rise 20s ease-in-out infinite alternate;
+	}
+	.horizon-finale {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		height: 320px;
+		background: linear-gradient(to top, rgba(255, 110, 55, 0.14) 0%, transparent 100%);
+		filter: blur(40px);
+	}
+
+	@keyframes breathe-light {
+		0% {
+			opacity: 0.8;
+			transform: translateX(-50%) scale(1);
+		}
+		100% {
+			opacity: 1;
+			transform: translateX(-50%) scale(1.05);
+		}
+	}
+
+	@keyframes slow-rise {
+		0% {
+			transform: translateX(-50%) translateY(0);
+		}
+		100% {
+			transform: translateX(-50%) translateY(-20px);
+		}
+	}
+</style>

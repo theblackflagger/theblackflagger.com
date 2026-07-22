@@ -1,0 +1,47 @@
+---
+// /apps gallery — lists visible apps from the collection with filter chips.
+// Hides draft/unlisted/archived; featured first, then newest.
+import { getCollection } from "astro:content";
+import AppLayout from "../../layouts/AppLayout.astro";
+import AppFilter from "../../components/apps/AppFilter.astro";
+import AppsGrid from "../../components/apps/AppsGrid.astro";
+
+const apps = (await getCollection("apps"))
+	.filter(
+		(app) =>
+			!app.data.draft && !app.data.isUnlisted && !app.data.isArchived,
+	)
+	.sort(
+		(a, b) =>
+			// Real apps first, "coming soon" teasers last; then featured, then newest.
+			Number(a.data.comingSoon) - Number(b.data.comingSoon) ||
+			Number(b.data.featured) - Number(a.data.featured) ||
+			b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+	);
+---
+
+<AppLayout
+	title="Apps — The Black Flagger"
+	description="Apps crafted by The Black Flagger — pursued like buried treasure until they're truly well-made."
+>
+	<section class="mx-auto max-w-3xl text-center">
+		<h1
+			class="text-4xl font-semibold tracking-tight text-text sm:text-5xl"
+			data-reveal
+		>
+			Apps
+		</h1>
+		<p
+			class="mx-auto mt-4 max-w-xl text-base leading-relaxed text-text-secondary"
+			data-reveal
+		>
+			Every app chased like buried treasure — until the thing in our hands
+			is truly well-crafted.
+		</p>
+	</section>
+
+	<div class="mt-10">
+		<AppFilter />
+		<AppsGrid apps={apps} />
+	</div>
+</AppLayout>
