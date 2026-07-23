@@ -1,0 +1,65 @@
+---
+// 404 — templated page (there are no bespoke landings in this repo; see the
+// hosted-vs-linked law in CLAUDE.md). Astro always emits src/pages/404.astro as
+// /404.html at the dist root regardless of build.format; Cloudflare Pages and
+// GitHub Pages both serve it for unmatched routes automatically. Chrome
+// (Header/Footer/Sunrise) and the data-reveal entrance come from AppLayout →
+// BaseLayout, same as /about. The big numeral carries the shared amber flare —
+// emphasis, not structure — and the copy keeps the pirate voice.
+import AppLayout from "../layouts/AppLayout.astro";
+---
+
+<AppLayout
+	title="Page not found — The Black Flagger"
+	description="This page sailed off the edge of the map — or was never charted."
+>
+	<section
+		class="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center py-16 text-center"
+	>
+		<p
+			class="font-mono text-xs uppercase tracking-[0.2em] text-text-tertiary"
+			data-reveal
+		>
+			Error 404
+		</p>
+
+		<h1
+			class="mt-4 text-7xl font-semibold tracking-tighter text-flare sm:text-8xl"
+			data-reveal
+		>
+			404
+		</h1>
+
+		<h2
+			class="mt-6 text-3xl font-semibold tracking-tight text-text sm:text-4xl"
+			data-reveal
+		>
+			Off the map.
+		</h2>
+
+		<p class="mt-4 text-lg leading-relaxed text-text-secondary" data-reveal>
+			This page sailed off the edge of the map — or was never charted.
+		</p>
+
+		{/* Manifesto line carries the shared amber accent — one highlighted phrase,
+		    matching /about's voice. */}
+		<p class="mt-2 text-flare" data-reveal>
+			Every pirate finds their way back to port. 🏴‍☠️
+		</p>
+
+		<div class="mt-10 flex flex-wrap justify-center gap-3" data-reveal>
+			<a
+				href="/"
+				class="btn-vibrancy rounded-lg border border-border px-5 py-2.5 text-sm text-text transition duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]"
+			>
+				Back to port
+			</a>
+			<a
+				href="/apps"
+				class="btn-vibrancy rounded-lg border border-border px-5 py-2.5 text-sm text-text transition duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]"
+			>
+				See the apps
+			</a>
+		</div>
+	</section>
+</AppLayout>
