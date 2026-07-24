@@ -44,7 +44,7 @@ const linkAttrs = comingSoon ? {} : { href: website ?? `/${slug}` };
 	data-stores={stores.join(" ")}
 	data-paid={String(isPaid)}
 	class:list={[
-		"group flex gap-4 rounded-2xl border border-white/[0.08] p-5 backdrop-blur-xl transition duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] sm:gap-5 sm:p-6",
+		"group flex items-center gap-4 rounded-2xl border border-white/[0.08] p-5 backdrop-blur-xl transition duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] sm:gap-5 sm:p-6",
 		comingSoon
 			? "cursor-default bg-white/[0.02] opacity-70"
 			: "bg-white/[0.04] hover:-translate-y-0.5 hover:border-white/[0.16] hover:bg-white/[0.07]",
@@ -72,7 +72,7 @@ const linkAttrs = comingSoon ? {} : { href: website ?? `/${slug}` };
 	<div class="flex min-w-0 flex-col justify-center">
 		<h3 class="text-2xl font-bold text-text sm:text-3xl">{title}</h3>
 		<p
-			class="mt-1 text-lg leading-tight text-text-secondary sm:text-xl"
+			class="mt-2 text-base leading-snug text-text-secondary sm:text-lg"
 			style="text-wrap: pretty"
 		>
 			{subtitle}
@@ -105,14 +105,7 @@ const linkAttrs = comingSoon ? {} : { href: website ?? `/${slug}` };
 			}
 			{
 				!comingSoon && (
-					<span
-						class="rounded-md px-2 py-0.5 text-xs"
-						class:list={[
-							isPaid
-								? "bg-flare text-bg"
-								: "border border-border text-text-tertiary",
-						]}
-					>
+					<span class="rounded-md border border-border px-2 py-0.5 text-xs text-text-tertiary">
 						{isPaid ? "Paid" : "Free"}
 					</span>
 				)

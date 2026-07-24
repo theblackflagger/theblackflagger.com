@@ -119,8 +119,10 @@ Sanctioned uses:
 - Links in rendered prose (docs + blog), underline included
 - List markers and the blockquote rule
 - Icon fills, chips, and status indicators
-- Active and hover state: filter chips, docs sidebar entry, disclosure `summary`,
-  card title on hover, directional glyphs
+- Active and hover state: docs sidebar entry, disclosure `summary`, card title
+  on hover, directional glyphs. (The apps filter chips are the exception: their
+  selected state is the white `--accent`, not amber — a selected filter is
+  structure, not emphasis.)
 - Focus ring on app landings (see [Focus](#focus))
 - `--flare-glow` bloom behind a hero or feature element
 

@@ -1,6 +1,6 @@
 ---
 title: "BlackFlare"
-subtitle: "Menu-bar notifications and usage for Claude Code & Codex — on your Mac, Telegram, or Slack. Private and on-device."
+subtitle: "Keeps your Mac awake for Claude Code & Codex, then pings you the moment a task finishes — on your Mac, Telegram, or Slack."
 pubDate: 2026-07-16
 platforms: ["macOS"]
 # BlackFlare lives on its own domain, so this hub renders no page for it — the
@@ -9,7 +9,7 @@ website: "https://blackflare.dev"
 stores:
   - type: direct
     url: "https://blackflare.dev"
-isPaid: false
+isPaid: true
 featured: true
 isArchived: false
 isUnlisted: false
