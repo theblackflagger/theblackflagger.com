@@ -1,20 +1,29 @@
 ---
 // Typography is the OS system stack (SF Pro / SF Mono on Apple, graceful
 // fallback elsewhere) declared in tokens.css — no font files ship.
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { imageSize } from "image-size";
 import "../styles/tokens.css";
 import Sunrise from "../components/Sunrise.astro";
 
 interface Props {
 	title?: string;
 	description?: string;
-	/** OG/Twitter image, resolved against the site origin. */
+	/**
+	 * OG/Twitter image, resolved against the site origin. Any size — the
+	 * og:image:width/height tags are measured off the file at build time.
+	 */
 	image?: string;
+	/** Alt text for the social card. Falls back to the page title. */
+	imageAlt?: string;
 }
 
 const {
 	title = "The Black Flagger",
 	description = "The Black Flagger — once a pirate, forever a pirate.",
 	image = "/og-default.png",
+	imageAlt,
 } = Astro.props;
 
 // Absolute URLs for canonical + social cards. Astro.site is set in astro.config.
@@ -28,6 +37,25 @@ const cleanPath =
 		: rawPath.replace(/\.html$/, "");
 const canonical = new URL(cleanPath, Astro.site);
 const ogImage = new URL(image, Astro.site);
+// Telegram, Slack, and iMessage size the preview box from og:image:width/height
+// before the image itself arrives; without them the card renders at a guessed
+// ratio and snaps once it loads. Measured off the file rather than hardcoded so
+// swapping in a card of a different shape cannot leave the tags lying — the two
+// sites that share this layout already ship different ratios. Resolved against
+// process.cwd() (the project root under every npm script) the same way
+// lib/apps.ts measures gallery screenshots; import.meta.url does not survive the
+// layout being bundled. Unreadable or remote `image` → no dimension tags, which
+// is what a consumer falls back to anyway.
+let ogImageDims: { width: number; height: number } | null = null;
+try {
+	const { width, height } = imageSize(
+		readFileSync(path.join(process.cwd(), "public", image)),
+	);
+	if (width && height) ogImageDims = { width, height };
+} catch {
+	// keep the build alive; the card still renders without the hints
+}
+const ogImageType = /\.jpe?g$/.test(image) ? "image/jpeg" : "image/png";
 ---
 
 <!doctype html>
@@ -38,10 +66,13 @@ const ogImage = new URL(image, Astro.site);
 		<title>{title}</title>
 		<meta name="description" content={description} />
 		<link rel="canonical" href={canonical} />
-		<link
-			rel="icon"
-			href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='5' fill='%230a0a0a'/><path d='M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3' fill='none' stroke='%23f5f5f5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>"
-		/>
+		{/* Brand favicon set (site-specific — do NOT sync to spun-out app repos).
+		    Cropped from the flag logo; /favicon.png is 192px because Google Search
+		    requires a favicon ≥48px in a multiple of 48. */}
+		<link rel="icon" href="/favicon.ico" sizes="48x48" />
+		<link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
+		<link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
 		<!-- Open Graph -->
 		<meta property="og:type" content="website" />
@@ -50,12 +81,23 @@ const ogImage = new URL(image, Astro.site);
 		<meta property="og:description" content={description} />
 		<meta property="og:url" content={canonical} />
 		<meta property="og:image" content={ogImage} />
+		{
+			ogImageDims && (
+				<>
+					<meta property="og:image:width" content={String(ogImageDims.width)} />
+					<meta property="og:image:height" content={String(ogImageDims.height)} />
+				</>
+			)
+		}
+		<meta property="og:image:type" content={ogImageType} />
+		<meta property="og:image:alt" content={imageAlt ?? title} />
 
 		<!-- Twitter -->
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:title" content={title} />
 		<meta name="twitter:description" content={description} />
 		<meta name="twitter:image" content={ogImage} />
+		<meta name="twitter:image:alt" content={imageAlt ?? title} />
 
 		<meta name="generator" content={Astro.generator} />
 

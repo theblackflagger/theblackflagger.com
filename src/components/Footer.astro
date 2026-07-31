@@ -8,7 +8,10 @@ const year = new Date().getFullYear();
 <footer
 	class="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 border-t border-border px-5 py-10 text-center sm:px-8"
 >
-	<div class="manifesto-container">
+	{/* data-nosnippet: Google was quoting this line as the SERP snippet, and its
+	    snippet renderer breaks the 🏴‍☠️ ZWJ sequence into a bare ☠️ — which reads
+	    as a malware warning next to the site name. Never let it be snippet text. */}
+	<div class="manifesto-container" data-nosnippet>
 		<span class="manifesto-flag" aria-hidden="true">🏴‍☠️</span>
 		<span class="manifesto-content">
 			pursuing treasure with genuine curiosity _
