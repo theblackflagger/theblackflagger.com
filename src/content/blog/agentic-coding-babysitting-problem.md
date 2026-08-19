@@ -3,7 +3,7 @@ title: "Agentic Coding Has a Babysitting Problem"
 pubDate: 2026-08-06
 description: "AI coding agents promised hands-off work, then turned us into babysitters. What hovering over Claude Code taught us, and the app we built to stop."
 tags: ["blackflare", "voyage"]
-heroImage: "/assets/blog/claude-pings-lock-screen.png"
+heroImage: "/assets/blog/claude-pings-lock-screen.webp"
 ---
 
 The pitch for AI coding agents is delegation: describe the work, walk away,
