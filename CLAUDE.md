@@ -149,8 +149,8 @@ you're unsure.
 
 ## Routing gotcha
 
-`build.format: "file"` emits flat files (`/apps.html`, `/blackbar.html`,
-`/blackbar/privacy.html`) so URLs without a trailing slash serve directly on both
+`build.format: "file"` emits flat files (`/apps.html`, `/<slug>.html`,
+`/<slug>/privacy.html`) so URLs without a trailing slash serve directly on both
 hosts. `/<slug>.html` and `/<slug>/privacy.html` are siblings and never collide.
 
 **Consequence:** at build time `Astro.url.pathname` ends in `.html`, and the home
@@ -186,6 +186,6 @@ Flagged, deliberately not fixed. Don't "discover" these again:
   `src/content.config.ts` is touched.
 - **`src/content/privacy/` holds no policies yet.** The collection, the route and
   the Support-block link all work — verified with a temporary fixture — but the
-  only two apps here are BlackFlare (its own domain, own policy) and BlackBar
-  (`comingSoon`, not shipped). Write the first real one when the first small app
+  only two apps here are BlackFlare and PowerMode (each on its own domain, with
+  its own policy). Write the first real one when the first small app
   ships; do not write one speculatively for an app whose behaviour isn't final.

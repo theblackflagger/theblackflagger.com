@@ -57,7 +57,7 @@ chain — the one that did (`blackflare.astro`) left for its own repo.
 ## Routes
 
 5 pages as of 2026-07-21 — the two `[slug]` routes generate nothing yet, because
-the only two apps are BlackFlare (its own domain) and BlackBar (`comingSoon`).
+the only two apps are BlackFlare and PowerMode (both on their own domains).
 
 | URL | Source | Generation |
 |---|---|---|
